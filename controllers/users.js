@@ -27,11 +27,11 @@ module.exports.getUserMe = (req, res, next) => {
 
 module.exports.createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password
+    email, password, name
   } = req.body;
   bcrypt.hash(password, 10).then((hash) => {
     User.create({
-      name, about, avatar, email, password: hash,
+      email, password: hash, name,
     })
       .then((newUser) => {
         if (!newUser) {
@@ -39,8 +39,6 @@ module.exports.createUser = (req, res, next) => {
         } else {
           res.send({
             name: newUser.name,
-            about: newUser.about,
-            avatar: newUser.avatar,
             email: newUser.email,
           });
         }
@@ -57,9 +55,9 @@ module.exports.createUser = (req, res, next) => {
 };
 
 module.exports.updateUser = (req, res, next) => {
-  const { name, about } = req.body;
+  const { name } = req.body;
   User.findByIdAndUpdate(
-    req.user._id, { name, about }, {
+    req.user._id, { name }, {
       new: true, runValidators: true, upsert: false
     })
     .then((user) => res.send(user))

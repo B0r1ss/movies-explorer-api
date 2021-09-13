@@ -15,7 +15,7 @@ module.exports.getMovies = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.createCard = (req, res, next) => {
+module.exports.createMovie = (req, res, next) => {
   const {
     country,
     director,
@@ -62,7 +62,7 @@ module.exports.createCard = (req, res, next) => {
     });
 };
 
-module.exports.deleteCard = (req, res, next) => {
+module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params._movieId)
     .select('+owner').then((movie) => {
       if (movie === null) {
