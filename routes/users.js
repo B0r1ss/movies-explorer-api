@@ -13,11 +13,12 @@ const validateUserId = celebrate({
 });
 const validateUserUpdate = celebrate({
   body: Joi.object().keys({
+    email: Joi.string().required().email(),
     name: Joi.string().required(),
   }),
 });
 
-usersRouter.get('/me', validateUserId, getUserMe);
-usersRouter.patch('/me', validateUserUpdate, updateUser);
+usersRouter.get('users/me', validateUserId, getUserMe);
+usersRouter.patch('users/me', validateUserUpdate, updateUser);
 
 module.exports = usersRouter;

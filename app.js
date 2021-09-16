@@ -3,42 +3,24 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const {
-  errors, celebrate, Joi, CelebrateError,
-} = require('celebrate');
-const validator = require('validator');
+const { errors } = require('celebrate');
 
 const cors = require('cors');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, BDPORT, NODE_ENV } = process.env;
 const app = express();
 const auth = require('./middlewares/auth');
+const limiter = require('./middlewares/rateLimiter');
+const signRouter = require('./routes/sign');
 const moviesRouter = require('./routes/movies');
 const usersRouter = require('./routes/users');
-const { login, createUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const NotFoundErr = require('./errors/notFoundErr');
 
-// Validation JOY
-const validateUserLogin = celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
-  }),
-});
-
-const validateUserSignup = celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
-    name: Joi.string().min(2).max(30),
-  }),
-});
-
 const options = {
   origin: [
-    'http://localhost:3000',
+    `http://localhost:${PORT}`,
     'https://mesto.borbackend.nomoredomains.monster',
   ],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
@@ -52,13 +34,14 @@ app.use('*', cors(options));
 app.use(express.json());
 app.use(helmet());
 
+app.use(limiter);
+
 app.use(requestLogger);
 
-app.use('/signin', validateUserLogin, login);
-app.post('/signup', validateUserSignup, createUser);
+app.use('/', signRouter);
 app.use(auth);
-app.use('/movies', moviesRouter);
-app.use('/users', usersRouter);
+app.use('/', moviesRouter);
+app.use('/', usersRouter);
 
 app.use(errorLogger);
 
@@ -66,15 +49,18 @@ app.use('/', (req, res) => {
   throw new NotFoundErr('Запрашиваемый ресурс не найден');
 });
 
-app.use(errors());
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+  const { statusCode = 409, message } = err;
   res.status(statusCode).send({
-    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+    message: statusCode === 409 ? 'Ошибка запроса' : message,
   });
 });
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+app.use(errors());
+
+mongoose.connect(NODE_ENV === 'production'
+  ? `mongodb://localhost:${BDPORT}/moviesdb`
+  : 'mongodb://localhost:27017/moviesdb', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -82,6 +68,5 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
 });
 
 app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
   console.log(`App listening on port ${PORT}`);
 });

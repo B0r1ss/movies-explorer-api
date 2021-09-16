@@ -1,8 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable function-paren-newline */
-/* eslint-disable comma-dangle */
-/* eslint-disable implicit-arrow-linebreak */
-/* eslint no-console: "error" */
 const BadReqErr = require('../errors/badReqErr');
 const NotFoundErr = require('../errors/notFoundErr');
 const ForbErr = require('../errors/forbErr');
@@ -45,15 +40,14 @@ module.exports.createMovie = (req, res, next) => {
       thumbnail,
       movieId,
       owner,
+    },
+  ).then((newMovie) => {
+    if (!newMovie) {
+      throw new NotFoundErr('Запрашиваемый ресурс не найден');
+    } else {
+      res.send(newMovie);
     }
-  )
-    .then((newMovie) => {
-      if (!newMovie) {
-        throw new NotFoundErr('Запрашиваемый ресурс не найден');
-      } else {
-        res.send(newMovie);
-      }
-    })
+  })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadReqErr('Ошибка валидации. Введены некорректные данные'));
@@ -68,8 +62,8 @@ module.exports.deleteMovie = (req, res, next) => {
       if (movie === null) {
         throw new NotFoundErr('Запрашиваемый ресурс не найден');
       }
-      if (!movie.owner.equals(req.user._id)) {
-        throw new ForbErr('Ошибка удаления чужой карточки');
+      if (!movie.owner.equals(req.user._movieId)) {
+        throw new ForbErr('Ошибка удаления чужого фильма');
       }
     }).then(() => {
       Movie.findByIdAndRemove(req.params._movieId)

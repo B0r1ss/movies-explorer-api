@@ -9,9 +9,7 @@ const {
 } = require('../controllers/movies');
 
 const validateMovieId = celebrate({
-  params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24).hex(),
-  }),
+  params: Joi.number().required(),
 });
 
 const validateMovie = celebrate({
@@ -45,15 +43,14 @@ const validateMovie = celebrate({
         }
         return url;
       }),
-    owner: Joi.required(),
     movieId: Joi.required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }),
 });
 
-moviesRouter.get('/', getMovies);
-moviesRouter.post('/', validateMovie, createMovie);
-moviesRouter.delete('/:_movieId', validateMovieId, deleteMovie);
+moviesRouter.get('/movies/', getMovies);
+moviesRouter.post('/movies/', validateMovie, createMovie);
+moviesRouter.delete('/movies/:_movieId', validateMovieId, deleteMovie);
 
 module.exports = moviesRouter;
