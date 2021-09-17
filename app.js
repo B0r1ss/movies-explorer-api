@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -45,11 +44,11 @@ app.use('/', usersRouter);
 
 app.use(errorLogger);
 
-app.use('/', (req, res) => {
+app.use('/', () => {
   throw new NotFoundErr('Запрашиваемый ресурс не найден');
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   const { statusCode = 409, message } = err;
   res.status(statusCode).send({
     message: statusCode === 409 ? 'Ошибка запроса' : message,

@@ -18,7 +18,7 @@ const validateUserUpdate = celebrate({
   }),
 });
 
-usersRouter.get('users/me', validateUserId, getUserMe);
-usersRouter.patch('users/me', validateUserUpdate, updateUser);
+usersRouter.get('/users/me', validateUserId, getUserMe);
+usersRouter.patch('/users/me', validateUserUpdate, updateUser);
 
 module.exports = usersRouter;
