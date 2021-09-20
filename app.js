@@ -6,16 +6,16 @@ const { errors } = require('celebrate');
 
 const cors = require('cors');
 
-const { PORT = 3000, BDPORT, NODE_ENV } = process.env;
+const { PORT = 3000, BD, NODE_ENV } = process.env;
 const app = express();
 const auth = require('./middlewares/auth');
 const limiter = require('./middlewares/rateLimiter');
 const signRouter = require('./routes/sign');
 const moviesRouter = require('./routes/movies');
 const usersRouter = require('./routes/users');
+const errRouter = require('./routes/error');
+const genErr = require('./middlewares/genErr');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-
-const NotFoundErr = require('./errors/notFoundErr');
 
 const options = {
   origin: [
@@ -33,32 +33,24 @@ app.use('*', cors(options));
 app.use(express.json());
 app.use(helmet());
 
-app.use(limiter);
-
 app.use(requestLogger);
 
+app.use(limiter);
+
 app.use('/', signRouter);
+
 app.use(auth);
 app.use('/', moviesRouter);
 app.use('/', usersRouter);
+app.use('/', errRouter);
 
 app.use(errorLogger);
-
-app.use('/', () => {
-  throw new NotFoundErr('Запрашиваемый ресурс не найден');
-});
-
-app.use((err, req, res) => {
-  const { statusCode = 409, message } = err;
-  res.status(statusCode).send({
-    message: statusCode === 409 ? 'Ошибка запроса' : message,
-  });
-});
-
 app.use(errors());
 
+app.use(genErr);
+
 mongoose.connect(NODE_ENV === 'production'
-  ? `mongodb://localhost:${BDPORT}/moviesdb`
+  ? BD
   : 'mongodb://localhost:27017/moviesdb', {
   useNewUrlParser: true,
   useCreateIndex: true,

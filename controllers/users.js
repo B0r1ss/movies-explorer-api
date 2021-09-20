@@ -13,7 +13,7 @@ module.exports.getUserMe = (req, res, next) => {
       if (!user) {
         throw new NotFoundErr('Пользователь с таким id не найден');
       } else {
-        res.send(user);
+        res.status(200).send(user);
       }
     })
     .catch((err) => {
@@ -33,9 +33,10 @@ module.exports.createUser = (req, res, next) => {
         if (!newUser) {
           throw new NotFoundErr('Ошибка создания пользователя');
         } else {
-          res.send({
+          res.status(200).send({
             name: newUser.name,
             email: newUser.email,
+            _id: newUser._id,
           });
         }
       })

@@ -6,7 +6,7 @@ const Movie = require('../models/movie');
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({})
-    .then((cards) => res.send(cards))
+    .then((cards) => res.status(200).send(cards))
     .catch(next);
 };
 
@@ -23,8 +23,8 @@ module.exports.createMovie = (req, res, next) => {
     nameEN,
     thumbnail,
     movieId,
-    owner,
   } = req.body;
+  const owner = req.user._id;
 
   Movie.create(
     {
@@ -45,7 +45,7 @@ module.exports.createMovie = (req, res, next) => {
     if (!newMovie) {
       throw new NotFoundErr('Запрашиваемый ресурс не найден');
     } else {
-      res.send(newMovie);
+      res.status(200).send(newMovie);
     }
   })
     .catch((err) => {
@@ -65,21 +65,8 @@ module.exports.deleteMovie = (req, res, next) => {
       if (!movie.owner.equals(req.user._movieId)) {
         throw new ForbErr('Ошибка удаления чужого фильма');
       }
-    }).then(() => {
-      Movie.findByIdAndRemove(req.params._movieId)
-        .then((movie) => {
-          if (movie === null) {
-            throw new NotFoundErr('Запрашиваемый ресурс не найден');
-          } else {
-            res.send(movie);
-          }
-        })
-        .catch((err) => {
-          if (err.name === 'CastError') {
-            next(new BadReqErr('Ошибка валидации. Введены некорректные данные'));
-          }
-          next(err);
-        });
+      Movie.findByIdAndDelete(req.params.movieId).select('-owner')
+        .then((deletedMovie) => res.status(200).send(deletedMovie));
     })
     .catch(next);
 };

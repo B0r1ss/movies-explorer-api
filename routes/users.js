@@ -6,19 +6,14 @@ const {
   updateUser,
 } = require('../controllers/users');
 
-const validateUserId = celebrate({
-  params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24).hex(),
-  }),
-});
 const validateUserUpdate = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    name: Joi.string().required(),
+    name: Joi.string().required().min(2).max(30),
   }),
 });
 
-usersRouter.get('/users/me', validateUserId, getUserMe);
+usersRouter.get('/users/me', getUserMe);
 usersRouter.patch('/users/me', validateUserUpdate, updateUser);
 
 module.exports = usersRouter;
