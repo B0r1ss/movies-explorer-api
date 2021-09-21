@@ -20,7 +20,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const options = {
   origin: [
     `http://localhost:${PORT}`,
-    'https://mesto.borbackend.nomoredomains.monster',
+    'https://movies-explorer.bor.nomoredomains.club',
   ],
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
   preflightContinue: false,
@@ -37,12 +37,12 @@ app.use(requestLogger);
 
 app.use(limiter);
 
-app.use('/', signRouter);
+app.use('/api/', signRouter);
 
 app.use(auth);
-app.use('/', moviesRouter);
-app.use('/', usersRouter);
-app.use('/', errRouter);
+app.use('/api/', moviesRouter);
+app.use('/api/', usersRouter);
+app.use('/api/', errRouter);
 
 app.use(errorLogger);
 app.use(errors());
