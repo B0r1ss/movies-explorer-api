@@ -64,8 +64,10 @@ module.exports.deleteMovie = (req, res, next) => {
       if (!movie.owner.equals(req.user._id)) {
         throw new ForbErr('Ошибка удаления чужого фильма');
       }
-      Movie.findByIdAndDelete(req.params.movieId).select('-owner')
-        .then((deletedMovie) => res.status(200).send(deletedMovie));
+      Movie.findByIdAndDelete(req.params._movieId)
+        .then((deletedMovie) => {
+          res.status(200).send(deletedMovie);
+        });
     })
     .catch(next);
 };
