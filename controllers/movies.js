@@ -25,7 +25,6 @@ module.exports.createMovie = (req, res, next) => {
     movieId,
   } = req.body;
   const owner = req.user._id;
-
   Movie.create(
     {
       country,
@@ -62,7 +61,7 @@ module.exports.deleteMovie = (req, res, next) => {
       if (movie === null) {
         throw new NotFoundErr('Запрашиваемый ресурс не найден');
       }
-      if (!movie.owner.equals(req.user._movieId)) {
+      if (!movie.owner.equals(req.user._id)) {
         throw new ForbErr('Ошибка удаления чужого фильма');
       }
       Movie.findByIdAndDelete(req.params.movieId).select('-owner')
