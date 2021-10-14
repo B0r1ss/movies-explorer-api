@@ -5,7 +5,8 @@ const ForbErr = require('../errors/forbErr');
 const Movie = require('../models/movie');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({})
+  const owner = req.user._id;
+  Movie.find({ owner })
     .then((cards) => res.status(200).send(cards))
     .catch(next);
 };
